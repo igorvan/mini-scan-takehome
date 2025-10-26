@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS scan_results (
+    hash BIGINT UNSIGNED PRIMARY KEY,
+    service VARCHAR(255) NOT NULL,
+    ip VARCHAR(64) NOT NULL,
+    port INT NOT NULL,
+    data VARCHAR(255),
+    ver TINYINT NOT NULL,
+    timestamp INT UNSIGNED NOT NULL
+);
