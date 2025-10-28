@@ -21,6 +21,6 @@ func New(storage Storage) (*Receiver, error) {
 // Process - store a scanning result in a storage
 // returns OK if the record was updated, otherwise returns false
 // in case if storage operation fails - returns an error
-func (r *Receiver) Process(ctx context.Context, scn *ScanResult) error {
+func (r *Receiver) Process(ctx context.Context, scn *ScanResult) (int64, error) {
 	return r.storage.Put(ctx, scn)
 }

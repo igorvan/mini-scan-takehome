@@ -4,6 +4,5 @@ CREATE TABLE IF NOT EXISTS scan_results (
     ip VARCHAR(64) NOT NULL,
     port INT NOT NULL,
     data VARCHAR(255),
-    ver TINYINT NOT NULL,
     timestamp INT UNSIGNED NOT NULL
 );

@@ -12,6 +12,7 @@ import (
 
 	"cloud.google.com/go/pubsub"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/lmittmann/tint"
 
 	"github.com/igorvan/scan-takehome/pkg/database"
 	"github.com/igorvan/scan-takehome/pkg/processing"
@@ -37,7 +38,7 @@ func main() {
 		panic(err)
 	}
 
-	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	logger := slog.New(tint.NewHandler(os.Stdout, nil))
 	storage, err := database.New(db, logger)
 	if err != nil {
 		panic(err)
@@ -66,7 +67,7 @@ func main() {
 		}
 		processingCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
 		defer cancel()
-		prcssr.Process(processingCtx, processing.NewScanResult(
+		n, err := prcssr.Process(processingCtx, processing.NewScanResult(
 			scanData.Ip,
 			scanData.Port,
 			scanData.Service,
@@ -74,6 +75,15 @@ func main() {
 			scanData.Data,
 			uint8(scanData.DataVersion),
 		))
+		if err != nil {
+			logger.Error(fmt.Sprintf("data processing error: %s, [Service: %s, IP: %s, Port: %d, Timestamp: %s, Data: %s]",
+				err, scanData.Service, scanData.Ip, scanData.Port, time.Unix(scanData.Timestamp, 0).Format(time.RFC3339), string(m.Data)))
+			// database write error - return without acking, let some other pod to retry
+			return
+		}
+		logger.Info(fmt.Sprintf("[Service: %s, IP: %s, Port: %d, Timestamp: %s, Data: %s] PUT operation success - undated %d rows",
+			scanData.Service, scanData.Ip, scanData.Port, time.Unix(scanData.Timestamp, 0).Format(time.RFC3339), string(m.Data), n))
+		m.Ack()
 	})
 
 	if err != nil {

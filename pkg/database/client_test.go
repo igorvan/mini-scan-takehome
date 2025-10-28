@@ -9,16 +9,16 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-type MySQLSuite struct {
+type ClientSuite struct {
 	suite.Suite
 	mock sqlmock.Sqlmock
 }
 
-func TestMySQLSuite(t *testing.T) {
-	suite.Run(t, &MySQLSuite{})
+func TestClientSuite(t *testing.T) {
+	suite.Run(t, &ClientSuite{})
 }
 
-func (s *MySQLSuite) TestNew() {
+func (s *ClientSuite) TestNew() {
 	mockDB, mock, _ := sqlmock.New(sqlmock.MonitorPingsOption(true))
 	testCases := []struct {
 		title         string

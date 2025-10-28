@@ -20,7 +20,7 @@ const (
 
 // Storage - scanning results storage
 type Storage interface {
-	Put(ctx context.Context, scan database.Scan) error
+	Put(ctx context.Context, scan database.Scan) (int64, error)
 }
 
 // ScanResult - domain scan result,
@@ -73,14 +73,14 @@ func (s *ScanResult) Data() string {
 	switch s.version {
 	case V1:
 		v1Data := unmarshal[V1Data](b)
-		if v1Data == nil {
+		if v1Data == nil || len(v1Data.ResponseBytesUtf8) == 0 {
 			s.decodedData = unknown
 			break
 		}
 		s.decodedData = string(v1Data.ResponseBytesUtf8)
 	case V2:
 		v2Data := unmarshal[V2Data](b)
-		if v2Data == nil {
+		if v2Data == nil || v2Data.ResponseStr == "" {
 			s.decodedData = unknown
 			break
 		}
@@ -125,7 +125,8 @@ func unmarshal[T any](b []byte) *T {
 	var res T
 	err := json.Unmarshal(b, &res)
 	if err != nil {
-		fmt.Println(fmt.Sprintf("corrupt message [%s] received - error decoding Base64:", b), err)
+		fmt.Println(fmt.Sprintf("error unmarshaling scan result data [%s]:", b), err)
+		return nil
 	}
 	return &res
 }

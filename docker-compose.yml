@@ -64,3 +64,12 @@ services:
     build:
       context: .
       dockerfile: ./cmd/processor/Dockerfile
+
+  # Runs the "observer" which validates the correctness of the processing mechanism
+  observer:
+    depends_on:
+     - processor
+     - db
+    build:
+      context: .
+      dockerfile: ./cmd/observer/Dockerfile
