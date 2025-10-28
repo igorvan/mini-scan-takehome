@@ -37,7 +37,7 @@ func main() {
 		if res != nil {
 			previousSet = res
 		}
-		msg := fmt.Sprintf("Scan data validation iteration has completed: %d incorrect transitions found", n)
+		msg := fmt.Sprintf("Scan data validation iteration has completed: %d incorrect transitions found, total DB records %d", n, len(res))
 		if n == 0 {
 			logger.Info(msg)
 		} else {
@@ -55,7 +55,7 @@ func doValidate(storage *database.Client, logger *slog.Logger, previousSet map[u
 		return 0, nil
 	}
 	if previousSet == nil {
-		return 0, nil
+		return 0, res
 	}
 	var count = 0
 	for key, row := range previousSet {

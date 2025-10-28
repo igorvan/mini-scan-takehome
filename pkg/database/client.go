@@ -24,12 +24,12 @@ type Scan interface {
 
 // ScanData - database table data representation
 type ScanData struct {
-	IP        string
-	Port      uint32
-	Service   string
-	Timestamp int64
-	Data      string
-	Hash      uint64
+	IP        string `sql:"ip"`
+	Port      uint32 `sql:"port"`
+	Service   string `sql:"service"`
+	Timestamp int64  `sql:"timestamp"`
+	Data      string `sql:"data"`
+	Hash      uint64 `sql:"hash"`
 }
 
 // Client - DB client wrapper
@@ -121,7 +121,7 @@ func (c *Client) GetAll(ctx context.Context) (map[uint64]*ScanData, error) {
 		if err := rows.Scan(&row.Hash, &row.Service, &row.IP, &row.Port, &row.Timestamp, &row.Data); err != nil {
 			return nil, err
 		}
-
+		res[row.Hash] = row
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err
@@ -148,6 +148,8 @@ func getUpdateQuery() string {
 				timestamp = ?, data = ? 
 			WHERE
 			  	hash = ? AND timestamp < ?;`
+	// wanna verify that observer truly reports broken storage logic - use the broken condition below
+	// hash = ? AND ? > 0;`
 }
 
 // Hash - returns murmur3 hash of the provided Scan result

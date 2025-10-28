@@ -81,7 +81,7 @@ func main() {
 			// database write error - return without acking, let some other pod to retry
 			return
 		}
-		logger.Info(fmt.Sprintf("[Service: %s, IP: %s, Port: %d, Timestamp: %s, Data: %s] PUT operation success - undated %d rows",
+		logger.Info(fmt.Sprintf("[Service: %s, IP: %s, Port: %d, Timestamp: %s, Data: %s] PUT operation success - updated %d rows",
 			scanData.Service, scanData.Ip, scanData.Port, time.Unix(scanData.Timestamp, 0).Format(time.RFC3339), string(m.Data), n))
 		m.Ack()
 	})
