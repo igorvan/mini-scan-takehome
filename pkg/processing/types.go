@@ -18,6 +18,16 @@ const (
 	unknown = "unknown"
 )
 
+// V1Data - bytes
+type V1Data struct {
+	ResponseBytesUtf8 []byte `json:"response_bytes_utf8"`
+}
+
+// V2Data - string
+type V2Data struct {
+	ResponseStr string `json:"response_str"`
+}
+
 // Storage - scanning results storage
 type Storage interface {
 	Put(ctx context.Context, scan database.Scan) (int64, error)
@@ -70,24 +80,7 @@ func (s *ScanResult) Data() string {
 		s.decodedData = unknown
 		return s.decodedData
 	}
-	switch s.version {
-	case V1:
-		v1Data := unmarshal[V1Data](b)
-		if v1Data == nil || len(v1Data.ResponseBytesUtf8) == 0 {
-			s.decodedData = unknown
-			break
-		}
-		s.decodedData = string(v1Data.ResponseBytesUtf8)
-	case V2:
-		v2Data := unmarshal[V2Data](b)
-		if v2Data == nil || v2Data.ResponseStr == "" {
-			s.decodedData = unknown
-			break
-		}
-		s.decodedData = v2Data.ResponseStr
-	default:
-		return unknown
-	}
+	s.decodedData = unmarshalData(s.version, b)
 	return s.decodedData
 }
 
@@ -111,14 +104,23 @@ func (s *ScanResult) Port() uint32 {
 	return s.port
 }
 
-// V1Data - bytes
-type V1Data struct {
-	ResponseBytesUtf8 []byte `json:"response_bytes_utf8"`
-}
-
-// V2Data - string
-type V2Data struct {
-	ResponseStr string `json:"response_str"`
+func unmarshalData(version uint8, b []byte) string {
+	switch version {
+	case V1:
+		v1Data := unmarshal[V1Data](b)
+		if v1Data == nil || len(v1Data.ResponseBytesUtf8) == 0 {
+			return unknown
+		}
+		return string(v1Data.ResponseBytesUtf8)
+	case V2:
+		v2Data := unmarshal[V2Data](b)
+		if v2Data == nil || v2Data.ResponseStr == "" {
+			return unknown
+		}
+		return v2Data.ResponseStr
+	default:
+		return unknown
+	}
 }
 
 func unmarshal[T any](b []byte) *T {

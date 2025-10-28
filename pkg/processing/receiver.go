@@ -13,7 +13,7 @@ type Receiver struct {
 // New - Receiver constructor
 func New(storage Storage) (*Receiver, error) {
 	if storage == nil {
-		return nil, fmt.Errorf("cannot instantiate a Receiver, no storage provided")
+		return nil, fmt.Errorf("cannot instantiate Receiver, no storage provided")
 	}
 	return &Receiver{storage: storage}, nil
 }
